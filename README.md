@@ -3,7 +3,7 @@
 > 📚 This project accompanies the Medium series:  
 > [Part 1 – MCP: The Missing Bridge That Makes AI Agents Truly Dynamic](https://awstip.com/mcp-the-missing-bridge-that-makes-ai-agents-truly-dynamic-6399ddbe0110)  
 > [Part 2 – From Concept to Code: Building Your First MCP-Powered Agent on AWS (1)](https://awstip.com/from-concept-to-code-building-your-first-mcp-powered-agent-on-aws-1f7e19a302bd)  
-> [Part 3 – From Concept to Code: Building Your First MCP-Powered Agent on AWS (2)](#)
+> [Part 3 – From Concept to Code: Building Your First MCP-Powered Agent on AWS (2)](https://medium.com/@yhocotw31016/from-concept-to-code-building-your-first-mcp-powered-agent-on-aws-2-a8a819205cb5)
 
 This project demonstrates how to build a highly extensible Amazon Bedrock Agent architecture by simulating the core principles of the Model Context Protocol (MCP)—specifically, its "plug-and-play" philosophy. While the implementation does not follow the formal MCP specification, it mimics the spirit and modularity of MCP, enabling flexible integration with external services. The system is orchestrated by a Return Control (ROC), which coordinates communication between the Bedrock Agent and MCP-style services.
 
