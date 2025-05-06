@@ -12,9 +12,10 @@ import os
 logging.basicConfig(level=logging.DEBUG)
 app = FastAPI()
 
-# build the Bedrock client
+# Initialize AWS Bedrock client for agent interactions
 bedrock_client = boto3.client("bedrock-agent-runtime", region_name="us-east-1")
 
+# Load configuration from environment variables
 AGENT_ID = os.getenv("BEDROCK_AGENT_ID") or "Your AgentId"
 AGENT_ALIAS_ID = os.getenv("BEDROCK_AGENT_ALIAS_ID") or "Your AliasId"
 ROC_HANDLER_URL = os.getenv("ROC_HANDLER_URL") or "http://localhost:8002"
@@ -27,6 +28,7 @@ async def frontend_query(request: Request):
     session_id = str(uuid.uuid4())
 
     try:
+        # Step 1: Send the user query to Bedrock Agent
         response = bedrock_client.invoke_agent(
             agentId=AGENT_ID,
             agentAliasId=AGENT_ALIAS_ID,
@@ -35,21 +37,21 @@ async def frontend_query(request: Request):
         )
         logging.info(f"Bedrock Agent response: {response.keys()}")
 
-        # get the session state and check for returnControl event
+        # Step 2: Process the agent response and look for returnControl events
         for event in response.get("completion", []):
             logging.info(f"Completion Event: {event}")
             if "returnControl" in event:
                 invocation = event["returnControl"]
                 logging.info(f"Received returnControl event: {invocation}")
 
-                # simulate the invocation to ROC handler
+                # Step 3: Forward the returnControl request to the ROC handler
                 roc_response = requests.post(
                     f"{ROC_HANDLER_URL}/roc/invocation",
                     json=invocation
                 )
                 roc_result = roc_response.json()
 
-                # send the result back to Bedrock Agent
+                # Step 4: Send the ROC handler result back to Bedrock Agent
                 fulfilled_response = bedrock_client.invoke_agent(
                     agentId=AGENT_ID,
                     agentAliasId=AGENT_ALIAS_ID,
@@ -58,7 +60,7 @@ async def frontend_query(request: Request):
                     endSession=False  # support for response
                 )
 
-                # collect the final message from the fulfilled response
+                # Step 5: Process the final agent response
                 final_message = ""
                 for fulfilled_event in fulfilled_response.get("completion", []):
                     chunk = fulfilled_event.get("chunk", {})
@@ -67,6 +69,7 @@ async def frontend_query(request: Request):
 
                 return JSONResponse(content={"agent_response": final_message})
 
+        # If no returnControl event was found in the response
         return JSONResponse(content={"agent_response": "[No returnControl event received]"}, status_code=400)
 
     except Exception as e:
